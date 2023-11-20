@@ -1,0 +1,66 @@
+/* Ref: http://web.simmons.edu/~grabiner/comm244/weeknine/css-layouts.html#three_column_unbalanced_layout */
+.content {
+  float: left;         /* This causes the content to move to the left 
+                          It's going to appear to the left of the content because 
+                          we declared it first in our HTML page */
+  width: 930px;        /* We need to set the width whenever we float an element */
+  height: 900px;
+}
+
+.sidebar-one {
+  float: left;         /* This causes the sidebar to move to the left */
+  width: 200px;        /* We need to set the width whenever we float an element */
+}
+
+
+.footer {
+  clear: both;         /* This makes sure that the footer clears both the sidebar and content floats */
+  width: 960px;        /* This sets the footer to stretch the full page width */
+}
+
+.Add{
+  background-image: url(Icons/add.png);
+}
+.Play{
+  background-image: url(Icons/play-button.png);
+}
+
+.Upload{
+  background-image: url(Icons/upload.png); 
+}
+.Download{
+  background-image: url(Icons/download.png); 
+}
+.SaveLoadContainer {
+  display: flex;
+}
+
+.Load {
+  margin-left: 20px;
+}
+
+label, button {
+  /*background-color: indigo;*/
+  color: black;
+  padding: 0.5rem;
+  font-family: sans-serif;
+  border-radius: 0.3rem;
+  cursor: pointer;
+  margin-top: 1rem;
+
+  width: 52px;
+  height: 52px;
+  background-size: 40px 40px;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+/*
+.SELECTED {
+  border: 4px solid #04AA6D;
+  color: black;
+}
+*/
+.SELECTED{
+  outline-style: outset;
+   
+}

@@ -1,0 +1,297 @@
+<html>
+<head>
+    <link rel="stylesheet" href="styles.css">
+    <!--<link rel="icon" type="image/x-icon" href="url(Icons/octopus.png);">-->
+    <link rel="icon" type="image/x-icon" href="Icons/octopus.png">
+
+</head>
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+precision mediump float;
+
+uniform float aHasTexture;
+varying float vHasTexture;
+
+attribute  vec4 vPosition;
+attribute  vec3 vNormal;
+varying vec4 fColor;
+
+         
+// texture coordinates per vertex
+attribute vec2 a_texcoord;
+varying vec2 v_texcoord;
+
+
+uniform vec4 ambientProduct, diffuseProduct, specularProduct;
+uniform mat4 modelViewMatrix;
+uniform mat4 projectionMatrix;
+uniform vec4 lightPosition;
+uniform float shininess;
+//uniform mat3 normalMatrix; //send identity matrix for cube
+
+
+void main() 
+{
+    vec3 pos = -(modelViewMatrix * vPosition).xyz;
+    
+    //fixed light postion
+    
+    vec3 light = lightPosition.xyz;
+    vec3 L = normalize( light - pos );
+
+	
+    vec3 E = normalize( -pos );
+    vec3 H = normalize( L + E );
+    
+    vec4 NN = vec4(vNormal,0);
+
+    // Transform vertex normal into eye coordinates
+       
+    vec3 N = normalize( (modelViewMatrix*NN).xyz);
+
+    // Compute terms in the illumination equation
+    vec4 ambient = ambientProduct;
+
+    float Kd = max( dot(L, N), 0.0 );
+    vec4  diffuse = Kd*diffuseProduct;
+
+    float Ks = pow( max(dot(N, H), 0.0), shininess );
+    vec4  specular = Ks * specularProduct;
+    
+    if( dot(L, N) < 0.0 ) {
+	specular = vec4(0.0, 0.0, 0.0, 1.0);
+    } 
+
+    gl_Position = projectionMatrix * modelViewMatrix * vPosition;
+    fColor = ambient + diffuse +specular;
+    
+    fColor.a = 1.0;
+
+    // per vertex texture coordinates are passed to the fragment shader
+    v_texcoord = a_texcoord;
+    
+    vHasTexture = aHasTexture;
+}
+
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+    precision mediump float;
+
+varying float vHasTexture;
+
+
+varying vec4 fColor;
+
+// per fragment texture coordinates that come from the vertex shader
+varying vec2 v_texcoord;
+
+// uniform texture that contains the image
+uniform sampler2D u_texture;
+
+
+void
+main()
+{
+    // get fragment color from texture
+    gl_FragColor = fColor;
+
+    if (vHasTexture == 1.0){
+        gl_FragColor *= texture2D(u_texture, v_texcoord);
+    }
+
+
+}
+</script>
+
+
+
+<script type="text/javascript" src="Common/webgl-utils.js"></script>
+<script type="text/javascript" src="Common/InitShaders.js"></script>
+<script type="text/javascript" src="Common/MV.js"></script>
+<script type="text/javascript" src="SaveLoadHandler.js"></script>
+<script type="text/javascript" src="octopuspls8.js"></script>
+
+
+
+
+
+<body>
+
+
+    <div class="content">
+        <!--<canvas id="gl-canvas" width="540" height="540"></canvas>-->
+        <canvas id="gl-canvas"  style="background-image: url('background.png');  background-repeat: no-repeat;  background-size: 100% 100%;
+        " width="540" height="540"></canvas>
+    </div>
+
+    <div class="sidebar1">
+        <div id="animation">
+            <button onclick="anim1FlagUpdater()">anim1</button>
+            <button onclick="anim2FlagUpdater()">anim2</button>
+            <div id="customs">
+                <button id="addFrame" class="Add"></button>
+                <button id="playAnimation" class="Play"></button>
+            </div>
+        </div>
+        <div id="head">Camera<br>
+            <!--X<input id="rotation1" type="range" min="0" max="360" step="-10" value="360">-->
+            Y<input id="rotation2" type="range" min="0" max="360" step="-10" value="360">
+            <!--Z<input id="rotation1" type="range" min="0" max="360" step="-10" value="360">-->
+        </div>
+        <button onclick="incrementLightLocation(1, 0, 0)">+X</button>
+        <button onclick="incrementLightLocation(-1, 0, 0)">-X</button>
+        <button onclick="incrementLightLocation(0, 1, 0)">+Y</button>
+        <button onclick="incrementLightLocation(0, -1, 0)">-Y</button>
+        <button onclick="incrementLightLocation(0, 0, 1)">+Z</button>
+        <button onclick="incrementLightLocation(0, 0, -1)">-Z</button>
+        <div id = "arm1">Arm 1
+            <div id = "part1">Upper 
+                X<input id="rotation1" type="range" min="0" max="360" step="10" value="0">
+                Y<input id="rotation2" type="range" min="0" max="360" step="10" value="0">
+                Z<input id="rotation3" type="range" min="0" max="360" step="10" value="0"><br>
+            </div>
+            <div id = "part2">Middle
+                X<input id="rotation1" type="range" min="0" max="360" step="10" value="0">
+                Y<input id="rotation2" type="range" min="0" max="360" step="10" value="0">
+                Z<input id="rotation3" type="range" min="0" max="360" step="10" value="0"><br>
+            </div>
+            <div id = "part3">Lower
+                X<input id="rotation1" type="range" min="0" max="360" step="10" value="0">
+                Y<input id="rotation2" type="range" min="0" max="360" step="10" value="0">
+                Z<input id="rotation3" type="range" min="0" max="360" step="10" value="0"><br>
+            </div>
+        </div>
+        <div id = "arm2">Arm 2
+            <div id = "part1">Upper 
+                X<input id="rotation1" type="range" min="0" max="360" step="10" value="0">
+                Y<input id="rotation2" type="range" min="0" max="360" step="10" value="0">
+                Z<input id="rotation3" type="range" min="0" max="360" step="10" value="0"><br>
+            </div>
+            <div id = "part2">Middle
+                X<input id="rotation1" type="range" min="0" max="360" step="10" value="0">
+                Y<input id="rotation2" type="range" min="0" max="360" step="10" value="0">
+                Z<input id="rotation3" type="range" min="0" max="360" step="10" value="0"><br>
+            </div>
+            <div id = "part3">Lower
+                X<input id="rotation1" type="range" min="0" max="360" step="10" value="0">
+                Y<input id="rotation2" type="range" min="0" max="360" step="10" value="0">
+                Z<input id="rotation3" type="range" min="0" max="360" step="10" value="0"><br>
+            </div>
+        </div>
+        <div id = "arm3">Arm 3
+            <div id = "part1">Upper 
+                X<input id="rotation1" type="range" min="0" max="360" step="10" value="0">
+                Y<input id="rotation2" type="range" min="0" max="360" step="10" value="0">
+                Z<input id="rotation3" type="range" min="0" max="360" step="10" value="0"><br>
+            </div>
+            <div id = "part2">Middle
+                X<input id="rotation1" type="range" min="0" max="360" step="10" value="0">
+                Y<input id="rotation2" type="range" min="0" max="360" step="10" value="0">
+                Z<input id="rotation3" type="range" min="0" max="360" step="10" value="0"><br>
+            </div>
+            <div id = "part3">Lower
+                X<input id="rotation1" type="range" min="0" max="360" step="10" value="0">
+                Y<input id="rotation2" type="range" min="0" max="360" step="10" value="0">
+                Z<input id="rotation3" type="range" min="0" max="360" step="10" value="0"><br>
+            </div>
+        </div>
+        <div id = "arm4">Arm 4
+            <div id = "part1">Upper 
+                X<input id="rotation1" type="range" min="0" max="360" step="10" value="0">
+                Y<input id="rotation2" type="range" min="0" max="360" step="10" value="0">
+                Z<input id="rotation3" type="range" min="0" max="360" step="10" value="0"><br>
+            </div>
+            <div id = "part2">Middle
+                X<input id="rotation1" type="range" min="0" max="360" step="10" value="0">
+                Y<input id="rotation2" type="range" min="0" max="360" step="10" value="0">
+                Z<input id="rotation3" type="range" min="0" max="360" step="10" value="0"><br>
+            </div>
+            <div id = "part3">Lower
+                X<input id="rotation1" type="range" min="0" max="360" step="10" value="0">
+                Y<input id="rotation2" type="range" min="0" max="360" step="10" value="0">
+                Z<input id="rotation3" type="range" min="0" max="360" step="10" value="0"><br>
+            </div>
+        </div>
+        <div id = "arm5">Arm 5
+            <div id = "part1">Upper 
+                X<input id="rotation1" type="range" min="0" max="360" step="10" value="0">
+                Y<input id="rotation2" type="range" min="0" max="360" step="10" value="0">
+                Z<input id="rotation3" type="range" min="0" max="360" step="10" value="0"><br>
+            </div>
+            <div id = "part2">Middle
+                X<input id="rotation1" type="range" min="0" max="360" step="10" value="0">
+                Y<input id="rotation2" type="range" min="0" max="360" step="10" value="0">
+                Z<input id="rotation3" type="range" min="0" max="360" step="10" value="0"><br>
+            </div>
+            <div id = "part3">Lower
+                X<input id="rotation1" type="range" min="0" max="360" step="10" value="0">
+                Y<input id="rotation2" type="range" min="0" max="360" step="10" value="0">
+                Z<input id="rotation3" type="range" min="0" max="360" step="10" value="0"><br>
+            </div>
+        </div>
+        <div id = "arm6">Arm 6
+            <div id = "part1">Upper 
+                X<input id="rotation1" type="range" min="0" max="360" step="10" value="0">
+                Y<input id="rotation2" type="range" min="0" max="360" step="10" value="0">
+                Z<input id="rotation3" type="range" min="0" max="360" step="10" value="0"><br>
+            </div>
+            <div id = "part2">Middle
+                X<input id="rotation1" type="range" min="0" max="360" step="10" value="0">
+                Y<input id="rotation2" type="range" min="0" max="360" step="10" value="0">
+                Z<input id="rotation3" type="range" min="0" max="360" step="10" value="0"><br>
+            </div>
+            <div id = "part3">Lower
+                X<input id="rotation1" type="range" min="0" max="360" step="10" value="0">
+                Y<input id="rotation2" type="range" min="0" max="360" step="10" value="0">
+                Z<input id="rotation3" type="range" min="0" max="360" step="10" value="0"><br>
+            </div>
+        </div>
+        <div id = "arm7">Arm 7
+            <div id = "part1">Upper 
+                X<input id="rotation1" type="range" min="0" max="360" step="10" value="0">
+                Y<input id="rotation2" type="range" min="0" max="360" step="10" value="0">
+                Z<input id="rotation3" type="range" min="0" max="360" step="10" value="0"><br>
+            </div>
+            <div id = "part2">Middle
+                X<input id="rotation1" type="range" min="0" max="360" step="10" value="0">
+                Y<input id="rotation2" type="range" min="0" max="360" step="10" value="0">
+                Z<input id="rotation3" type="range" min="0" max="360" step="10" value="0"><br>
+            </div>
+            <div id = "part3">Lower
+                X<input id="rotation1" type="range" min="0" max="360" step="10" value="0">
+                Y<input id="rotation2" type="range" min="0" max="360" step="10" value="0">
+                Z<input id="rotation3" type="range" min="0" max="360" step="10" value="0"><br>
+            </div>
+        </div>
+        <div id = "arm8">Arm 8
+            <div id = "part1">Upper 
+                X<input id="rotation1" type="range" min="0" max="360" step="10" value="0">
+                Y<input id="rotation2" type="range" min="0" max="360" step="10" value="0">
+                Z<input id="rotation3" type="range" min="0" max="360" step="10" value="0"><br>
+            </div>
+            <div id = "part2">Middle
+                X<input id="rotation1" type="range" min="0" max="360" step="10" value="0">
+                Y<input id="rotation2" type="range" min="0" max="360" step="10" value="0">
+                Z<input id="rotation3" type="range" min="0" max="360" step="10" value="0"><br>
+            </div>
+            <div id = "part3">Lower
+                X<input id="rotation1" type="range" min="0" max="360" step="10" value="0">
+                Y<input id="rotation2" type="range" min="0" max="360" step="10" value="0">
+                Z<input id="rotation3" type="range" min="0" max="360" step="10" value="0"><br>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div id="SaveLoad" class="SaveLoadContainer">
+            <button class="Save Download"></button>
+            <form id="Load" novalidate>
+                <input id ="LoadForm" type="file" accept=".txt" style="display: none;" required />
+                <button class="Upload"><label for ="LoadForm"></label></button>
+            </form>
+        </div>
+    </div>
+
+</body>
+</html>
