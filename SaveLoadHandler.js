@@ -1,4 +1,4 @@
-class SaveLoadHandler{
+export default class SaveLoadHandler{
     constructor(stateSetter, renderHandler){
         this.SEPERATOR = "&";
         this.stateSetter = stateSetter;

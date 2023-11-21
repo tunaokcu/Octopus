@@ -1,6 +1,7 @@
 //
 //  initShaders.js
 //
+export {initShaders}
 
 function initShaders( gl, vertexShaderId, fragmentShaderId )
 {

@@ -25,7 +25,7 @@ function radians( degrees ) {
 //  Vector Constructors
 //
 
-function vec2()
+export function vec2()
 {
     var result = _argumentsToArray( arguments );
 
@@ -37,7 +37,7 @@ function vec2()
     return result.splice( 0, 2 );
 }
 
-function vec3()
+export function vec3()
 {
     var result = _argumentsToArray( arguments );
 
@@ -50,7 +50,7 @@ function vec3()
     return result.splice( 0, 3 );
 }
 
-function vec4()
+export function vec4()
 {
     var result = _argumentsToArray( arguments );
 
@@ -127,7 +127,7 @@ function mat3()
 
 //----------------------------------------------------------------------------
 
-function mat4()
+export function mat4()
 {
     var v = _argumentsToArray( arguments );
 
@@ -229,7 +229,7 @@ function add( u, v )
 
 //----------------------------------------------------------------------------
 
-function subtract( u, v )
+export function subtract( u, v )
 {
     var result = [];
 
@@ -272,7 +272,7 @@ function subtract( u, v )
 
 //----------------------------------------------------------------------------
 
-function mult( u, v )
+export function mult( u, v )
 {
     var result = [];
 
@@ -321,7 +321,7 @@ function mult( u, v )
 //  Basic Transformation Matrix Generators
 //
 
-function translate( x, y, z )
+export function translate( x, y, z )
 {
     if ( Array.isArray(x) && x.length == 3 ) {
         z = x[2];
@@ -339,7 +339,7 @@ function translate( x, y, z )
 
 //----------------------------------------------------------------------------
 
-function rotate( angle, axis )
+export function rotate( angle, axis )
 {
     if ( !Array.isArray(axis) ) {
         axis = [ arguments[1], arguments[2], arguments[3] ];
@@ -367,7 +367,7 @@ function rotate( angle, axis )
 
 
 
-function scale4(a, b, c) {
+export function scale4(a, b, c) {
     var result = mat4();
     result[0][0] = a;
     result[1][1] = b;
@@ -398,7 +398,7 @@ function scale( x, y, z )
 //  ModelView Matrix Generators
 //
 
-function lookAt( eye, at, up )
+export function lookAt( eye, at, up )
 {
     if ( !Array.isArray(eye) || eye.length != 3) {
         throw "lookAt(): first parameter [eye] must be an a vec3";
@@ -437,7 +437,7 @@ function lookAt( eye, at, up )
 //  Projection Matrix Generators
 //
 
-function ortho( left, right, bottom, top, near, far )
+export function ortho( left, right, bottom, top, near, far )
 {
     if ( left == right ) { throw "ortho(): left and right are equal"; }
     if ( bottom == top ) { throw "ortho(): bottom and top are equal"; }
@@ -460,7 +460,7 @@ function ortho( left, right, bottom, top, near, far )
 
 //----------------------------------------------------------------------------
 
-function perspective( fovy, aspect, near, far )
+export function perspective( fovy, aspect, near, far )
 {
     var f = 1.0 / Math.tan( radians(fovy) / 2 );
     var d = far - near;
@@ -533,7 +533,7 @@ function negate( u )
 
 //----------------------------------------------------------------------------
 
-function cross( u, v )
+export function cross( u, v )
 {
     if ( !Array.isArray(u) || u.length < 3 ) {
         throw "cross(): first argument is not a vector of at least 3";
@@ -608,7 +608,7 @@ function mix( u, v, s )
 //
 // Vector and Matrix functions
 //
-
+/*
 function scale( s, u )
 {
     if ( !Array.isArray(u) ) {
@@ -622,13 +622,13 @@ function scale( s, u )
     
     return result;
 }
-
+*/
 //----------------------------------------------------------------------------
 //
 //
 //
 
-function flatten( v )
+export function flatten( v )
 {
     if ( v.matrix === true ) {
         v = transpose( v );

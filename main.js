@@ -1,3 +1,9 @@
+import {vec2, vec3, vec4, mat4, subtract, mult, translate, rotate, scale4, lookAt, ortho, perspective, cross, flatten} from "./Common/MV.js";
+import {WebGLUtils} from "./Common/myWebGLUtils.js";
+import {initShaders} from "./Common/initShaders.js";
+import SaveLoadHandler from "./SaveLoadHandler.js";
+
+
 var canvas;
 var gl;
 var program;
@@ -728,16 +734,33 @@ var init = function () {
     instantiateArmSliders();
     instantiateHeadSliders();
     instantiateAnimationUI();
+    instantiatePresetAnimationUI();
+    instantiateLightUI();
     //instantiateSaveLoadButtons();
 
 
     updateNodesAndRender();
+}
+function instantiatePresetAnimationUI(){
+    document.getElementById("anim1").addEventListener("click", anim1FlagUpdater);
+    document.getElementById("anim2").addEventListener("click", anim2FlagUpdater);
 }
 
 function updateNodesAndRender(){
     //Initialize nodes and render
     for(i=0; i<numNodes; i++) initNodes(nodeIds[i]);
     render();
+}
+
+function instantiateLightUI(){
+    document.getElementById("x+").addEventListener("click", () => (incrementLightLocation(1, 0, 0)));
+    document.getElementById("x-").addEventListener("click", () => (incrementLightLocation(-1, 0, 0)));
+
+    document.getElementById("y+").addEventListener("click", () => (incrementLightLocation(0, 1, 0)));
+    document.getElementById("y-").addEventListener("click", () => (incrementLightLocation(0, -1, 0)));
+
+    document.getElementById("z+").addEventListener("click", () => (incrementLightLocation(0, 0, 1)));
+    document.getElementById("z-").addEventListener("click", () => (incrementLightLocation(0, 0, -1)));
 }
 
 window.onload = init;
@@ -904,7 +927,7 @@ function getId(armNo, armPartNo,rotationNo){
 }
 
 //!TODO 
-anim1Flag = false;
+var anim1Flag = false;
 function anim1FlagUpdater(){
     anim2Flag = false;
     customAnimFlag = false;
@@ -1003,7 +1026,7 @@ function animation1(time){
     updateNodesAndRender();
     setTimeout( () => (animation1(time)), 10);
 }
-anim2Flag = false;
+var anim2Flag = false;
 function anim2FlagUpdater(){
     anim1Flag = false;
     customAnimFlag = false;

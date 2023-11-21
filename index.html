@@ -106,13 +106,14 @@ main()
 </script>
 
 
+<script type="module" src="main.js"></script>
 
+<!--
 <script type="text/javascript" src="./Common/webgl-utils.js"></script>
 <script type="text/javascript" src="./Common/InitShaders.js"></script>
 <script type="text/javascript" src="./Common/MV.js"></script>
 <script type="text/javascript" src="SaveLoadHandler.js"></script>
-<script type="text/javascript" src="octopuspls8.js"></script>
-
+-->
 
 
 
@@ -128,8 +129,8 @@ main()
 
     <div class="sidebar1">
         <div id="animation">
-            <button onclick="anim1FlagUpdater()">anim1</button>
-            <button onclick="anim2FlagUpdater()">anim2</button>
+            <button id ="anim1">anim1</button>
+            <button id="anim2">anim2</button>
             <div id="customs">
                 <button id="addFrame" class="Add"></button>
                 <button id="playAnimation" class="Play"></button>
@@ -140,12 +141,12 @@ main()
             Y<input id="rotation2" type="range" min="0" max="360" step="-10" value="360">
             <!--Z<input id="rotation1" type="range" min="0" max="360" step="-10" value="360">-->
         </div>
-        <button onclick="incrementLightLocation(1, 0, 0)">+X</button>
-        <button onclick="incrementLightLocation(-1, 0, 0)">-X</button>
-        <button onclick="incrementLightLocation(0, 1, 0)">+Y</button>
-        <button onclick="incrementLightLocation(0, -1, 0)">-Y</button>
-        <button onclick="incrementLightLocation(0, 0, 1)">+Z</button>
-        <button onclick="incrementLightLocation(0, 0, -1)">-Z</button>
+        <button id="x+">+X</button>
+        <button id="x-">-X</button>
+        <button id="y+">+Y</button>
+        <button id="y-">-Y</button>
+        <button id="z+">+Z</button>
+        <button id="z-">-Z</button>
         <div id = "arm1">Arm 1
             <div id = "part1">Upper 
                 X<input id="rotation1" type="range" min="0" max="360" step="10" value="0">
