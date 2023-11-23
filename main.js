@@ -3,7 +3,6 @@ import {WebGLUtils} from "./Common/myWebGLUtils.js";
 import {initShaders} from "./Common/initShaders.js";
 import SaveLoadHandler from "./SaveLoadHandler.js";
 
-
 var canvas;
 var gl;
 var program;
@@ -13,7 +12,6 @@ var modelViewMatrix;
 var instanceMatrix;
 
 var modelViewMatrixLoc;
-var modelViewLoc;
 
 
 var headID = 0;
@@ -569,9 +567,11 @@ function upperLeg() {
     drawResizedCube(legUpperHeight, legUpperWidth); 
 }
 function middleLeg() {
+    gl.uniform1f(hasTexture, 0.0);
     drawResizedCube(legMiddleHeight, legMiddleWidth);
 }
 function lowerLeg() {
+    gl.uniform1f(hasTexture, 0.0);
     drawResizedCube(legLowerHeight, legLowerWidth);
 }
 
@@ -619,7 +619,7 @@ function cube()
     quad( 5, 4, 0, 1 );
 }
 function drawResizedCube(height, width){
-    gl.clear(gl.DEPTH_BUFFER_BIT);
+    //gl.clear(gl.DEPTH_BUFFER_BIT);
 
     instanceMatrix = mult(modelViewMatrix, translate(0.0, 0.5 * height, 0.0 ));
 	instanceMatrix = mult(instanceMatrix, scale4(width, height, width) );
@@ -685,10 +685,12 @@ var init = function () {
     gl = WebGLUtils.setupWebGL( canvas );
     if ( !gl ) { alert( "WebGL isn't available" ); }
     gl.viewport( 0, 0, canvas.width, canvas.height );
+
+    //Commented out to make background visible
     //gl.clearColor( 1.0, 1.0, 1.0, 1.0 );
     program = initShaders( gl, "vertex-shader", "fragment-shader");
-    gl.useProgram( program);
-
+    gl.useProgram(program);
+    //Doesn't work for some reason
     gl.enable(gl.DEPTH_TEST);
 
     //Initialize the primitive, cube
@@ -716,13 +718,16 @@ var init = function () {
     vBuffer = gl.createBuffer();
 
     //Set camera
-    //projectionMatrix = ortho(-10.0,10.0,-10.0, 10.0,-10.0,10.0);
     projectionMatrix = ortho(-10, 10, -10, 10, -100, 100);
 
-    gl.uniformMatrix4fv(gl.getUniformLocation( program, "modelViewMatrix"), false, flatten(modelViewMatrix) );
-    gl.uniformMatrix4fv( gl.getUniformLocation( program, "projectionMatrix"), false, flatten(projectionMatrix) );
+    //Matrices
+    //TODO storing locations could be useless since they are only INITIALIZED
     modelViewMatrixLoc = gl.getUniformLocation(program, "modelViewMatrix")
-    
+    projectionMatrixLoc = gl.getUniformLocation( program, "projectionMatrix");
+    gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(modelViewMatrix) );
+    gl.uniformMatrix4fv(projectionMatrixLoc, false, flatten(projectionMatrix) );
+
+
     vBuffer = gl.createBuffer();    
     gl.bindBuffer( gl.ARRAY_BUFFER, vBuffer );
     gl.bufferData(gl.ARRAY_BUFFER, flatten(cubePoints), gl.STATIC_DRAW);
@@ -736,7 +741,6 @@ var init = function () {
     instantiateAnimationUI();
     instantiatePresetAnimationUI();
     instantiateLightUI();
-    //instantiateSaveLoadButtons();
 
 
     updateNodesAndRender();
@@ -766,7 +770,7 @@ function instantiateLightUI(){
 window.onload = init;
 
 var render = function() {
-    gl.clear(gl.COLOR_BUFFER_BIT );
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     //gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     traverse(headID);
 }
