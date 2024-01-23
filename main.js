@@ -168,8 +168,6 @@ class Node{
     }
 }
 
-
-
 var numLegs = 8;
 var numNodes = 1 + 3*numLegs;//1 for head, 3*numLegs for legs
 var nodeIds = [headID, leg1UpprID, leg1MiddleID, leg1LowerID,
@@ -547,26 +545,34 @@ function initFaceTexture(){
     // initially texture is 1x1 blue pixel
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([0, 0, 255, 255]));
 
+    changeFaceTexture("Textures/octopusFace.jpg")
+}
+
+//Thre is only one texture object, the uvs and the image are unique(the uvs arent unique for a cube though)
+function drawTexture(uvs, image){
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,gl.UNSIGNED_BYTE, image);
+    gl.bufferData(gl.ARRAY_BUFFER, flatten(uvs), gl.STATIC_DRAW);
+
+    
+    // texture width and heigh should be a power of 2, otherwise you would get an error on this line
+    gl.generateMipmap(gl.TEXTURE_2D);
+}
+ 
+function changeFaceTexture(src){
     // we will load the image asynchronously
     var image = new Image();
-    image.src =  "Textures/octopusFace.jpg"; 
- 
-    
+    image.src =  src;
+
     image.addEventListener('load', function() {
         // after the image is loaded, bind it as our texture
         // this requires the file to be on the server with the same origin as our script
-        gl.bindTexture(gl.TEXTURE_2D, texture);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,gl.UNSIGNED_BYTE, image);
-        
-        // texture width and heigh should be a power of 2, otherwise you would get an error on this line
-        gl.generateMipmap(gl.TEXTURE_2D);
+        drawTexture(uvs, image);
 
         updateNodesAndRender();
 
     });    
 }
-
- 
 
 function head() {
     gl.uniform1f(hasTexture, 1.0);
@@ -748,10 +754,16 @@ var init = function () {
     instantiateAnimationUI();
     instantiatePresetAnimationUI();
     instantiateLightUI();
-
+    instantiateTextureTestUI();
 
     updateNodesAndRender();
 }
+function instantiateTextureTestUI(){
+    document.getElementById("textureTest").addEventListener("click", () => changeFaceTexture("Textures/cubeTexture.png"))
+}
+
+
+
 function instantiatePresetAnimationUI(){
     document.getElementById("anim1").addEventListener("click", anim1FlagUpdater);
     document.getElementById("anim2").addEventListener("click", anim2FlagUpdater);
