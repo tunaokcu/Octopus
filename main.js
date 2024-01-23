@@ -506,32 +506,25 @@ function traverse(Id) {
 
 //Limbs
 
-//Looks better but still erroneous  
 var uvs = [
-    vec2(0, 0),
     vec2(0, 1),
-    vec2(1, 1),
-
-
+    vec2(0, 0),
     vec2(1, 0),
-    vec2(0, 1),
-    vec2(0, 0),
 
+    vec2(0, 1),
+    vec2(1, 0),
+    vec2(1, 1)
 ];
 
-/*
-var uvs =  [
-    vec2(0, 0),
-    vec2(0, 1),
-    vec2(1, 1),
-    vec2(1, 0)
-];*/
 
 var uv_buffer;
 var uv_attribute;
 var texture;
 var hasTexture;
 function initFaceTexture(){
+    //So that the texture is not flipped
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+
     // here we create buffer and attribute pointer for texture coordinates
     uv_buffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, uv_buffer);
@@ -552,12 +545,13 @@ function initFaceTexture(){
     gl.bindTexture(gl.TEXTURE_2D, texture);
 
     // initially texture is 1x1 blue pixel
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE,
-        new Uint8Array([0, 0, 255, 255]));
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([0, 0, 255, 255]));
 
     // we will load the image asynchronously
     var image = new Image();
     image.src =  "Textures/octopusFace.jpg"; 
+ 
+    
     image.addEventListener('load', function() {
         // after the image is loaded, bind it as our texture
         // this requires the file to be on the server with the same origin as our script
@@ -566,18 +560,13 @@ function initFaceTexture(){
         
         // texture width and heigh should be a power of 2, otherwise you would get an error on this line
         gl.generateMipmap(gl.TEXTURE_2D);
-        
+
         updateNodesAndRender();
 
-        //imgTest(image)
     });    
 }
 
-/*verification that image is loaded correctly 
-function imgTest(image){
-    document.getElementById("body").appendChild(image)
-}
-*/
+ 
 
 function head() {
     gl.uniform1f(hasTexture, 1.0);
