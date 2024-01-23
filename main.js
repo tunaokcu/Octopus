@@ -13,7 +13,6 @@ var instanceMatrix;
 
 var modelViewMatrixLoc;
 
-
 var headID = 0;
 
 var leg1UpprID = 1;
@@ -200,7 +199,6 @@ var theta = [0,
             0, 0, 0,
             0, 0, 0
             ]
-console.log(theta.length)
  
 
 var stack = [];
@@ -508,12 +506,27 @@ function traverse(Id) {
 
 //Limbs
 
+//Looks better but still erroneous  
+var uvs = [
+    vec2(0, 0),
+    vec2(0, 1),
+    vec2(1, 1),
+
+
+    vec2(1, 0),
+    vec2(0, 1),
+    vec2(0, 0),
+
+];
+
+/*
 var uvs =  [
     vec2(0, 0),
     vec2(0, 1),
     vec2(1, 1),
     vec2(1, 0)
-];
+];*/
+
 var uv_buffer;
 var uv_attribute;
 var texture;
@@ -555,9 +568,17 @@ function initFaceTexture(){
         gl.generateMipmap(gl.TEXTURE_2D);
         
         updateNodesAndRender();
-    });
-              
+
+        //imgTest(image)
+    });    
 }
+
+/*verification that image is loaded correctly 
+function imgTest(image){
+    document.getElementById("body").appendChild(image)
+}
+*/
+
 function head() {
     gl.uniform1f(hasTexture, 1.0);
     drawResizedCube(headHeight, headWidth); 
@@ -619,12 +640,9 @@ function cube()
     quad( 5, 4, 0, 1 );
 }
 function drawResizedCube(height, width){
-    //gl.clear(gl.DEPTH_BUFFER_BIT);
-
     instanceMatrix = mult(modelViewMatrix, translate(0.0, 0.5 * height, 0.0 ));
 	instanceMatrix = mult(instanceMatrix, scale4(width, height, width) );
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(instanceMatrix));
-    //for(var i =0; i<6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4*i, 4);
     
     //!This is rendering stuff
     gl.bindBuffer( gl.ARRAY_BUFFER, nBuffer );
@@ -650,17 +668,18 @@ var lightAmbient = vec4(0.2, 0.2, 0.2, 1.0 );
 var lightDiffuse = vec4( 1.0, 1.0, 1.0, 1.0 );
 var lightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
 
+
+
+//Shared?... or exclusive?..
+var ambientColor, diffuseColor, specularColor;
+var projectionMatrixLoc, shininessLoc, lightPositionLoc, specularProductLoc, diffuseProductLoc, ambientProductLoc;
+
 //!MATERIAL STUFF, SHOULD BE EXCLUSIVE TO ONE OBJECT 
 var octopusColor = vec4(193.0/255, 74.0/255, 65.0/255, 0);
 var materialAmbient = octopusColor;
 var materialDiffuse = octopusColor;
 var materialSpecular = octopusColor;
 var materialShininess = 50.0;
-
-//Shared?... or exclusive?..
-var ambientColor, diffuseColor, specularColor;
-var projectionMatrixLoc, shininessLoc, lightPositionLoc, specularProductLoc, diffuseProductLoc, ambientProductLoc;
-
 function calculateAndSendLightValues(){
     var ambientProduct = mult(lightAmbient, materialAmbient);
     var diffuseProduct = mult(lightDiffuse, materialDiffuse);
@@ -707,7 +726,6 @@ var init = function () {
     specularProductLoc = gl.getUniformLocation(program, "specularProduct"); 
     ambientProductLoc = gl.getUniformLocation(program, "ambientProduct");
     diffuseProductLoc = gl.getUniformLocation(program, "diffuseProduct")
-
     
     //Calculate and send light stuff
     calculateAndSendLightValues();
@@ -727,7 +745,7 @@ var init = function () {
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(modelViewMatrix) );
     gl.uniformMatrix4fv(projectionMatrixLoc, false, flatten(projectionMatrix) );
 
-
+    //!repetition here
     vBuffer = gl.createBuffer();    
     gl.bindBuffer( gl.ARRAY_BUFFER, vBuffer );
     gl.bufferData(gl.ARRAY_BUFFER, flatten(cubePoints), gl.STATIC_DRAW);
@@ -771,7 +789,6 @@ window.onload = init;
 
 var render = function() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    //gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     traverse(headID);
 }
 
@@ -779,38 +796,193 @@ function setAnimation(dataArr){
     animation = dataArr.slice();
 }
 
-var customAnimFlag = false;
+var curAnim = -1;
 function toggleCustomAnimFlag(){
-    anim2Flag = false;
-    anim1Flag = false;
-
-    if(customAnimFlag == true)
-        customAnimFlag = false;
-    else{
-        customAnimFlag = true;
+    if (curAnim == 0){
+        curAnim = -1;
+    }else{
+        curAnim = 0
+        interpolateBetweenFrames(); //Better idea: start interpolation work between frames immediately every time a new frame is added(do this asynchronously), and store it somewhere
         animate();
     }
 }
+//!TODO 
+function anim1FlagUpdater(){
+    if (curAnim == 1){
+        curAnim = -1;
+    }else{
+        curAnim = 1;
+        theta = [60, 
+            180, 0,   0, 0,   0, 0,
+            180, 0,   0, 0,   0, 0,
+            180, 0,   0, 0,   0, 0,
+            180, 0,   0, 0,   0, 0,
+            180, 0,   0, 0,   0, 0,
+            180, 0,   0, 0,   0, 0,
+            180, 0,   0, 0,   0, 0,
+            180, 0,   0, 0,   0, 0,
+            0, 0, 0,
+            0, 0, 0,
+            0, 0, 0,
+            0, 0, 0,
+            0, 0, 0,
+            0, 0, 0,
+            0, 0, 0,
+            0, 0, 0];
+        init()
+        animation1(0);
+    }
+}
+function animation1(time){
+    if (curAnim != 1) {
+        return;
+    }
+
+    time += 0.01;
+    var adjust;
+    var speed = 1;
+    var c = time * speed;
+    // front upper legs
+    adjust = -45 * Math.abs(Math.sin(c)) + 180; // between 180 and 135 degrees
+    for(i = 0; i < 3; i++){
+        theta[ i*6 + 1] = adjust
+    }
+    adjust = 45 * Math.abs(Math.sin(c+0.1)); // between 0 and 45 degrees
+    // front middle legs
+    for(i = 0; i < 3; i++){
+        theta[i*6 + 3] = adjust
+    }
+    adjust = 30 * Math.abs(Math.sin(c+0.1)); // between 0 and 45 degrees
+    // front lower legs
+    for(i = 0; i < 3; i++){
+        theta[i*6 + 5] = adjust
+    }
+    adjust = 45 * Math.abs(Math.sin(c)); // between 45 and 0 degrees
+    // left middle upper leg
+    theta[58] = adjust
+    
+    adjust = -45 * Math.abs(Math.sin(c+0.1));
+    // left middle middle leg
+    theta[59] = adjust
+
+    adjust = -30 * Math.abs(Math.sin(c+0.1));
+    // left middle lower leg
+    theta[60] = adjust
+
+    adjust = -45 * Math.abs(Math.sin(c)); // between -45 and 0 degrees
+    // right middle upper leg
+    theta[61] = adjust
+    
+    adjust = 45 * Math.abs(Math.sin(c+0.1));
+    // right middle middle leg
+    theta[62] = adjust
+
+    adjust = 30 * Math.abs(Math.sin(c+0.1));
+    // right middle lower leg
+    theta [63] = adjust
+
+    adjust = 45 * Math.abs(Math.sin(c)) + 180; // between 180 and 270 degrees
+    // back upper legs
+    for(i = 5; i < 8; i++){
+        theta[ i*6 + 1] = adjust
+    }
+    adjust = -45 * Math.abs(Math.sin(c+0.1));
+    // back middle legs
+    for(i = 5; i < 8; i++){
+        theta[ i*6 + 3] = adjust
+    }
+    adjust = -30 * Math.abs(Math.sin(c+0.1));
+    // back lower legs
+    for(i = 5; i < 8; i++){
+        theta[i*6 + 5] = adjust
+    }
+    updateNodesAndRender();
+    setTimeout( () => (animation1(time)), 10);
+}
+function anim2FlagUpdater(){
+    if (curAnim == 2){
+        curAnim = -1;
+    }else{
+        curAnim = 2;
+        theta = [0, 
+            180, 0,   0, 0,   0, 0,
+            180, 0,   0, 0,   0, 0,
+            180, 0,   0, 0,   0, 0,
+            180, 0,   0, 0,   0, 0,
+            180, 0,   0, 0,   0, 0,
+            180, 0,   0, 0,   0, 0,
+            180, 0,   0, 0,   0, 0,
+            180, 0,   0, 0,   0, 0,
+            0, 0, 0,
+            0, 0, 0,
+            0, 0, 0,
+            0, 0, 0,
+            0, 0, 0,
+            0, 0, 0,
+            0, 0, 0,
+            0, 0, 0];
+        init()
+        animation2(0);
+    }
+}
+var animation2Innerflag = false;
+function animation2(time){
+    if (curAnim != 2) {
+        return;
+    }
+    time += 0.01;
+    var adjust;
+    var speed = 1;
+    var c = time * speed;
+
+    // front left upper z
+    if(theta[64] < 89){
+        adjust = 90 * Math.abs(Math.sin(c)); // between 90 and 0 degrees
+        theta[64] = adjust
+    }
+    // front left middle z
+    if(theta[65] < 80){
+        adjust = 90 * Math.abs(Math.sin(c)); // between 90 and 0 degrees
+        theta[65] = adjust
+    }   
+    
+    if (theta[64] > 89 && theta[65] > 80 && !animation2Innerflag) {
+        animation2Innerflag = true;
+        c = 0;
+    }
+    // front left lower z
+    if (theta[64] > 89 && theta[65] > 80 && animation2Innerflag) {
+        adjust = 30 * Math.abs(Math.sin(c*15));
+        theta[66] = adjust    
+    }
+    
+    // front right upper z
+    if (theta[70] > -89) {
+        adjust = -90 * Math.abs(Math.sin(c));
+        theta[70] = adjust    
+    }
+    
+    updateNodesAndRender();
+    setTimeout( () => (animation2(time)), 10);
+}
+
 
 var SAVE_LOAD_HANDLER;
-var animation = []; //each array in this array is an animation, each array in each animation is a frame fully described by the theta values present within the scene graph
+var animation = []; //each array in this array is an animation, each array in each animation is a frame fully described by the theta values present within the scene graph...
+                    //...would be the ideal scenario... as of now this is just one animation
 function instantiateAnimationUI(){
     let addButton = document.getElementById("addFrame");
     addButton.addEventListener("click", (event) => (addFrame(event)));
     
     let playButton = document.getElementById("playAnimation");
     playButton.addEventListener("click", (event) => (toggleCustomAnimFlag()));
-    //let customs = document.getElementById("customs").getElementsByTagName("button")
 
-    //let n = customs.length;
-    //[...customs].map((custom, index) => addFrame(index, n));
     instantiateSaveLoadButtons();
 }
 
 function addFrame(event){
     animation.push(theta.slice());
 }
-
 
 
 async function animate(smoothness = 100.0){
@@ -827,13 +999,13 @@ async function animate(smoothness = 100.0){
 
         await animateRecurs(cur, delta, smoothness);
 
-        if (customAnimFlag == false){
+        if (curAnim != 0){
             return;
         }
     }
 }
 async function animateRecurs(cur, delta, smoothness = 100.0, t = 100){
-        if (smoothness < 0 || customAnimFlag == false){
+        if (smoothness < 0 || curAnim != 0){
             return;
         }
 
@@ -841,7 +1013,6 @@ async function animateRecurs(cur, delta, smoothness = 100.0, t = 100){
             cur[frame] += delta[frame];
         }
         theta = cur.slice();
-        console.log(theta)
 
         updateNodesAndRender();
 
@@ -930,194 +1101,7 @@ function getId(armNo, armPartNo,rotationNo){
     }
 }
 
-//!TODO 
-var anim1Flag = false;
-function anim1FlagUpdater(){
-    anim2Flag = false;
-    customAnimFlag = false;
 
-    if(anim1Flag == true)
-        anim1Flag = false;
-    else{
-        anim1Flag = true;
-        theta = [60, 
-            180, 0,   0, 0,   0, 0,
-            180, 0,   0, 0,   0, 0,
-            180, 0,   0, 0,   0, 0,
-            180, 0,   0, 0,   0, 0,
-            180, 0,   0, 0,   0, 0,
-            180, 0,   0, 0,   0, 0,
-            180, 0,   0, 0,   0, 0,
-            180, 0,   0, 0,   0, 0,
-            0, 0, 0,
-            0, 0, 0,
-            0, 0, 0,
-            0, 0, 0,
-            0, 0, 0,
-            0, 0, 0,
-            0, 0, 0,
-            0, 0, 0];
-            init();
-        animation1(0);
-    }
-        
-    console.log(anim1Flag);
-}
-function animation1(time){
-    if (!anim1Flag) {
-        return;
-    }
-    console.log("func executed");
-    console.log(anim1Flag);
-    time += 0.01;
-    var adjust;
-    var speed = 1;
-    var c = time * speed;
-    // front upper legs
-    adjust = -45 * Math.abs(Math.sin(c)) + 180; // between 180 and 135 degrees
-    for(i = 0; i < 3; i++){
-        theta[ i*6 + 1] = adjust
-    }
-    adjust = 45 * Math.abs(Math.sin(c+0.1)); // between 0 and 45 degrees
-    // front middle legs
-    for(i = 0; i < 3; i++){
-        theta[i*6 + 3] = adjust
-    }
-    adjust = 30 * Math.abs(Math.sin(c+0.1)); // between 0 and 45 degrees
-    // front lower legs
-    for(i = 0; i < 3; i++){
-        theta[i*6 + 5] = adjust
-    }
-    adjust = 45 * Math.abs(Math.sin(c)); // between 45 and 0 degrees
-    // left middle upper leg
-    theta[58] = adjust
-    
-    adjust = -45 * Math.abs(Math.sin(c+0.1));
-    // left middle middle leg
-    theta[59] = adjust
-
-    adjust = -30 * Math.abs(Math.sin(c+0.1));
-    // left middle lower leg
-    theta[60] = adjust
-
-    adjust = -45 * Math.abs(Math.sin(c)); // between -45 and 0 degrees
-    // right middle upper leg
-    theta[61] = adjust
-    
-    adjust = 45 * Math.abs(Math.sin(c+0.1));
-    // right middle middle leg
-    theta[62] = adjust
-
-    adjust = 30 * Math.abs(Math.sin(c+0.1));
-    // right middle lower leg
-    theta [63] = adjust
-
-    adjust = 45 * Math.abs(Math.sin(c)) + 180; // between 180 and 270 degrees
-    // back upper legs
-    for(i = 5; i < 8; i++){
-        theta[ i*6 + 1] = adjust
-    }
-    adjust = -45 * Math.abs(Math.sin(c+0.1));
-    // back middle legs
-    for(i = 5; i < 8; i++){
-        theta[ i*6 + 3] = adjust
-    }
-    adjust = -30 * Math.abs(Math.sin(c+0.1));
-    // back lower legs
-    for(i = 5; i < 8; i++){
-        theta[i*6 + 5] = adjust
-    }
-    updateNodesAndRender();
-    setTimeout( () => (animation1(time)), 10);
-}
-var anim2Flag = false;
-function anim2FlagUpdater(){
-    anim1Flag = false;
-    customAnimFlag = false;
-
-    if(anim2Flag == true)
-        anim2Flag = false;
-    else{
-        anim2Flag = true;
-        theta = [0, 
-            180, 0,   0, 0,   0, 0,
-            180, 0,   0, 0,   0, 0,
-            180, 0,   0, 0,   0, 0,
-            180, 0,   0, 0,   0, 0,
-            180, 0,   0, 0,   0, 0,
-            180, 0,   0, 0,   0, 0,
-            180, 0,   0, 0,   0, 0,
-            180, 0,   0, 0,   0, 0,
-            0, 0, 0,
-            0, 0, 0,
-            0, 0, 0,
-            0, 0, 0,
-            0, 0, 0,
-            0, 0, 0,
-            0, 0, 0,
-            0, 0, 0];
-            init()
-        animation2(0);
-    }
-}
-var animation2Innerflag = false;
-function animation2(time){
-    if (!anim2Flag) {
-        return;
-    }
-    console.log(anim2Flag);
-    time += 0.01;
-    var adjust;
-    var speed = 1;
-    var c = time * speed;
-
-    // front left upper x
-    //theta[1] = adjust
-    // front right upper x
-    //theta[13] = adjust
-
-    // front left upper z
-    if(theta[64] < 89){
-        adjust = 90 * Math.abs(Math.sin(c)); // between 90 and 0 degrees
-        theta[64] = adjust
-    }
-    // front left middle z
-    if(theta[65] < 80){
-        adjust = 90 * Math.abs(Math.sin(c)); // between 90 and 0 degrees
-        theta[65] = adjust
-    }   
-    
-    if (theta[64] > 89 && theta[65] > 80 && !animation2Innerflag) {
-        animation2Innerflag = true;
-        c = 0;
-    }
-    // front left lower z
-    if (theta[64] > 89 && theta[65] > 80 && animation2Innerflag) {
-        adjust = 30 * Math.abs(Math.sin(c*15));
-        theta[66] = adjust    
-    }
-    
-    // front right upper z
-    if (theta[70] > -89) {
-        console.log(theta[70])
-        adjust = -90 * Math.abs(Math.sin(c));
-        theta[70] = adjust    
-    }
-    
-    /*
-    adjust = 45 * Math.abs(Math.sin(c+0.1)); // between 0 and 45 degrees
-    // front middle legs
-    for(i = 0; i < 3; i++){
-        theta[i*6 + 3] = adjust
-    }
-    adjust = 30 * Math.abs(Math.sin(c+0.1)); // between 0 and 45 degrees
-    // front lower legs
-    for(i = 0; i < 3; i++){
-        theta[i*6 + 5] = adjust
-    }*/
-    updateNodesAndRender();
-    setTimeout( () => (animation2(time)), 10);
-}
 
 function insertBefore(newNode, existingNode) {
     existingNode.parentNode.insertBefore(newNode, existingNode);

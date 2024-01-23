@@ -26,6 +26,7 @@ varying vec2 v_texcoord;
 uniform vec4 ambientProduct, diffuseProduct, specularProduct;
 uniform mat4 modelViewMatrix;
 uniform mat4 projectionMatrix;
+
 uniform vec4 lightPosition;
 uniform float shininess;
 //uniform mat3 normalMatrix; //send identity matrix for cube
@@ -118,7 +119,7 @@ main()
 
 
 
-<body>
+<body id="body">
 
 
     <div class="content">
